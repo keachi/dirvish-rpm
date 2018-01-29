@@ -7,6 +7,7 @@ URL:            http://www.dirvish.org
 
 Source0:        http://www.dirvish.org/dirvish-%{version}.tgz
 Source1:        https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/master.conf#/%{name}-%{version}.conf
+Patch0:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/01-imsort-reserved-warning.patch
 BuildArch:      noarch
 
 Requires:       rsync
@@ -18,6 +19,7 @@ Dirvish is a fast, disk based, rotating network backup system.
 
 %prep
 %setup -q -n dirvish-%{version}
+%patch -P 0 -p 1
 
 %build
 EXECUTABLES="dirvish dirvish-runall dirvish-expire dirvish-locate"
