@@ -1,0 +1,29 @@
+--- a/dirvish-expire.pl
++++ b/dirvish-expire.pl
+@@ -140,6 +140,8 @@
+ 		qw(VAULT:BRANCH IMAGE CREATED EXPIRED);
+ }
+ 
++$cannot_expire = 0;
++
+ for $expire (sort {imsort()} @expires)
+ {
+ 	my ($created, $expired);
+@@ -156,6 +158,7 @@
+ 			and ++$unexpired{$$expire{vault}}{$$expire{branch}};
+ 		# By virtue of the sort order this will be the newest 
+ 		# image so that older ones can be expired.
++		$cannot_expire++;
+ 		next;
+ 	}
+ 	$$Options{quiet} or printf "%-15s %-15s %-16.16s  %s\n",
+@@ -172,6 +175,9 @@
+ 	system("rm -rf $$expire{path}");
+ }
+ 
++$cannot_expire > 199 and exit 199;
++$cannot_expire > 0 and exit $cannot_expire;
++
+ exit 0;
+ 
+ sub check_expire
