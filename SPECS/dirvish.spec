@@ -8,6 +8,8 @@ URL:            http://www.dirvish.org
 Source0:        http://www.dirvish.org/dirvish-%{version}.tgz
 BuildArch:      noarch
 
+Requires:       rsync
+
 BuildRequires:  perl
 
 %description
