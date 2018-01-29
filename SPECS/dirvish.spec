@@ -6,6 +6,7 @@ License:        GPL
 URL:            http://www.dirvish.org
 
 Source0:        http://www.dirvish.org/dirvish-%{version}.tgz
+Source1:        https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/master.conf#/%{name}-%{version}.conf
 BuildArch:      noarch
 
 Requires:       rsync
@@ -63,10 +64,14 @@ done
 
 mkdir -p %{buildroot}/etc/dirvish/
 
+# create directory for configs
+install -Dm644 %{SOURCE1} "%{buildroot}%{_sysconfdir}/dirvish/master.conf"
+
 %{_fixperms} $RPM_BUILD_ROOT/*
 
 %files
 %doc CHANGELOG RELEASE.html COPYING TODO.html FAQ.html INSTALL
+%config(noreplace)%{_sysconfdir}/dirvish/master.conf
 %{_mandir}/man5/*
 %{_mandir}/man8/*
 %{_prefix}/bin/dirvish
