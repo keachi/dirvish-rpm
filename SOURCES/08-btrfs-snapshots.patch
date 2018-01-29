@@ -1,0 +1,117 @@
+Patch by: Hans van Kranenburg <hans.van.kranenburg@mendix.com>
+
+This patch enables the use of btrfs subvolumes instead of the rsync
+--link-dest feature. 
+
+It is based on the original patch by Adrian von Bidder...
+http://www.dirvish.org/pipermail/dirvish/2010-December/002357.html
+
+...with the following changes:
+
+- don't use rsync --inplace to prevent fragmentation
+  (also see http://www.spinics.net/lists/linux-btrfs/msg40354.html)
+- change snapshots to read only after they've been successfully made
+  to prevent accidental changing or removal of content
+- proper whitespace
+--- a/dirvish-expire.pl
++++ b/dirvish-expire.pl
+@@ -169,7 +169,17 @@ for $expire (sort {imsort()} @expires)
+ 
+ 	$$Options{'no-run'} and next;
+ 
+-	system("rm -rf $$expire{path}/tree");
++	if ($$Options{btrfs})
++	{
++		# am I not root?
++		if ($< != 0)
++		{
++			system("btrfs property set -ts $$expire{path}/tree ro false > /dev/null");
++		}
++		system("btrfs subvolume delete $$expire{path}/tree > /dev/null");
++	} else {
++		system("rm -rf $$expire{path}/tree");
++	}
+ 	$$Options{tree} and next;
+ 
+ 	system("rm -rf $$expire{path}");
+--- a/dirvish.conf.5
++++ b/dirvish.conf.5
+@@ -177,6 +177,9 @@ This also specifies a default value for
+ .Bi branch\-default: branch_name (S)
+ Specify a default \*[branch] to use.
+ .TP
++.Bi btrfs: (B)
++If true, use btrfs snapshots instead of hardlinked trees.
++.TP
+ .Bi client: \*ousername@\*cclient_name (S)
+ specify a client to back up.
+ 
+--- a/dirvish.pl
++++ b/dirvish.pl
+@@ -93,6 +93,7 @@ use Time::Period;
+ 	whole-file
+ 	xdev
+ 	zxfer
++	btrfs
+ );
+ 
+ %RSYNC_OPT = (		# simple options
+@@ -458,7 +459,20 @@ if (!$$Options{'no-run'})
+ {
+ 	mkdir "$vault/$image", 0700
+ 		or seppuku 230, "mkdir $vault/$image failed";
+-	mkdir $destree, 0755;
++
++	if ($$Options{btrfs})
++	{
++		if ($$Options{init})
++		{
++			system("btrfs subvolume create $destree > /dev/null") == 0
++				or seppuku 233, "creating btrfs volume at $vault/$image/tree failed";
++		} else {
++			system("btrfs subvolume snapshot $reftree $destree > /dev/null") == 0
++				or seppuku 234, "creating btrfs snapshot at $vault/$image/tree failed";
++		}
++	} else {
++		mkdir $destree, 0755;
++	}
+ 
+ 	open(SUMMARY, ">$vault/$image/summary")
+ 		or seppuku 231, "cannot create $vault/$image/summary"; 
+@@ -514,7 +528,7 @@ for $key (@summary_fields, 'RESET', sort
+ 	printf SUMMARY "%s: %s\n", $key, $val;
+ }
+ 
+-$$Options{init} or push @rsyncargs, "--link-dest=$reftree";
++$$Options{init} or $$Options{btrfs} or push @rsyncargs, "--link-dest=$reftree";
+ 
+ $rclient = undef;
+ $$Options{client} ne $$Options{Server}
+@@ -762,7 +776,17 @@ if ($$Options{'post-server'})
+ 
+ if($status{fatal})
+ {
+-	system ("rm -rf $destree");
++	if ($$Options{btrfs})
++	{
++		# am I not root?
++		if ($< != 0)
++		{
++			system("btrfs property set -ts $destree ro false > /dev/null");
++		}
++		system ("btrfs subvolume delete $destree > /dev/null");
++	} else {
++		system ("rm -rf $destree");
++	}
+ 	unlink $err_temp;
+ 	printf SUMMARY "%s: %s\n", 'Status', $Status_msg;
+ 	exit 199;
+@@ -794,6 +818,8 @@ if ($Status eq 'success')
+ 			);
+ 		close (HIST);
+ 	}
++
++	system("btrfs property set -ts $destree ro true")
+ } else {
+ 	printf STDERR "dirvish error: branch %s:%s image %s failed\n",
+ 		$vault, $$Options{branch}, $$Options{Image};
