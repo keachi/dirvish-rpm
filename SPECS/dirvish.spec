@@ -10,6 +10,7 @@ Source1:        https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOUR
 Patch0:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/01-imsort-reserved-warning.patch
 Patch1:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/02-rsync-options.patch
 Patch2:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/03-dirvish-locate.patch
+Patch3:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/04-dirvish-runall-usrsbin.patch
 BuildArch:      noarch
 
 Requires:       rsync
@@ -24,6 +25,7 @@ Dirvish is a fast, disk based, rotating network backup system.
 %patch -P 0 -p 1
 %patch -P 1 -p 1
 %patch -P 2 -p 1
+%patch -P 3 -p 1
 
 %build
 EXECUTABLES="dirvish dirvish-runall dirvish-expire dirvish-locate"

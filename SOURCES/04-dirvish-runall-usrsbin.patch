@@ -1,0 +1,15 @@
+From: Paul Slootman <paul@debian.org>
+Subject: Debian installs dirvish into /usr/sbin, so look for it there by
+ default.
+
+--- dirvish-1.2.1~/dirvish-runall.pl	2005-02-19 01:52:31.000000000 +0100
++++ dirvish-1.2.1/dirvish-runall.pl	2006-07-27 17:58:47.767699558 +0200
+@@ -92,7 +92,7 @@
+ {
+ 	seppuku 251, "ERROR: no global configuration file";
+ }
+-$$Config{Dirvish} ||= 'dirvish';
++$$Config{Dirvish} ||= '/usr/sbin/dirvish';
+ 
+ $$Options{'no-run'} and $$Options{quiet} = 0;
+ 
