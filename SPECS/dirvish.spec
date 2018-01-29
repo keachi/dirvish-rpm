@@ -12,6 +12,7 @@ Patch1:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOUR
 Patch2:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/03-dirvish-locate.patch
 Patch3:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/04-dirvish-runall-usrsbin.patch
 Patch4:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/05-dirvish-runall-concurrency.patch
+Patch5:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/06-remove-trailing-slash-in-vault.patch
 BuildArch:      noarch
 
 Requires:       rsync
@@ -28,6 +29,7 @@ Dirvish is a fast, disk based, rotating network backup system.
 %patch -P 2 -p 1
 %patch -P 3 -p 1
 %patch -P 4 -p 1
+%patch -P 5 -p 1
 
 %build
 EXECUTABLES="dirvish dirvish-runall dirvish-expire dirvish-locate"

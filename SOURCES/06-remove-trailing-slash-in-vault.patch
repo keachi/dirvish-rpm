@@ -1,0 +1,29 @@
+commit c6cad2907cffec61713f97c38d94ef38d62c270f
+Author: Pim van den Berg <pim.van.den.berg@mendix.com>
+Date:   Mon Aug 12 18:15:40 2013 +0200
+
+    dirvish.pl: remove trailing slash in vault
+    
+    Sometimes we create a backup manually like this (autocomplete):
+    dirvish --init --vault subdomain.domain.tld/
+    
+    After a while dirvish-expire comes in and can't remove this backup because
+    there is only 1 backup left containing the trailing slash:
+    > cannot expire subdomain.domain.tld/:default:2013072217 No unexpired good images
+
+diff --git a/dirvish.pl b/dirvish.pl
+index c2488c4..92d45a4 100644
+--- a/dirvish.pl
++++ b/dirvish.pl
+@@ -188,6 +188,11 @@ $Options = {
+ 				$$Options{$_[0]} = $_[1];
+ 				loadconfig('f', 'default.conf', $Options);
+ 			}
++			# remove trailing slash
++			if ($$Options{$_[0]} =~ /\/$/) {
++				print STDERR "NOTICE: Removing trailing slash...\n";
++				$$Options{$_[0]} =~ s/\/$//;
++			}
+ 		},
+ 	reset		=>
+ 		sub {
