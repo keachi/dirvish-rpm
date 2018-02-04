@@ -1,0 +1,144 @@
+index 6c42390..d7b081d 100644
+--- a/dirvish-expire.pl
++++ b/dirvish-expire.pl
+@@ -47,7 +47,7 @@ sub usage
+ 	print STDERR <<EOUSAGE;
+ USAGE
+ 	dirvish.expire OPTIONS
+-	
++
+ OPTIONS
+ 	--time date_expression
+ 	--[no]tree
+@@ -59,8 +59,8 @@ EOUSAGE
+ 	exit 255;
+ }
+ 
+-$Options = 
+-{ 
++$Options =
++{
+ 	help		=> \&usage,
+ 	version		=> sub {
+ 			print STDERR "dirvish version $VERSION\n";
+@@ -147,7 +147,7 @@ for $expire (sort {imsort()} @expires)
+ 	my ($created, $expired);
+ 	($created = $$expire{created}) =~ s/:\d\d$//;
+ 	($expired = $$expire{expire}) =~ s/:\d\d$//;
+-	
++
+ 	if (!$unexpired{$$expire{vault}}{$$expire{branch}})
+ 	{
+ 		printf "cannot expire %s:%s:%s No unexpired good images\n",
+@@ -156,7 +156,7 @@ for $expire (sort {imsort()} @expires)
+ 			$$expire{image};
+ 		$$expire{status} =~ /^success/
+ 			and ++$unexpired{$$expire{vault}}{$$expire{branch}};
+-		# By virtue of the sort order this will be the newest 
++		# By virtue of the sort order this will be the newest
+ 		# image so that older ones can be expired.
+ 		$cannot_expire++;
+ 		next;
+@@ -172,10 +172,7 @@ for $expire (sort {imsort()} @expires)
+ 	if ($$Options{btrfs})
+ 	{
+ 		# am I not root?
+-		if ($< != 0)
+-		{
+-			system("btrfs property set -ts $$expire{path}/tree ro false > /dev/null");
+-		}
++		system("btrfs property set -ts $$expire{path}/tree ro false > /dev/null");
+ 		system("btrfs subvolume delete $$expire{path}/tree > /dev/null");
+ 	} else {
+ 		system("rm -rf $$expire{path}/tree");
+@@ -229,7 +226,7 @@ sub findop
+ 
+ 		$summary = loadconfig('R', $File::Find::name);
+ 		$status = check_expire($summary, $expire_time);
+-		
++
+ 		$status < 0 and return;
+ 
+ 		$$summary{vault} && $$summary{branch} && $$summary{Image}
+index 9729172..9f37a29 100644
+--- a/dirvish.pl
++++ b/dirvish.pl
+@@ -129,7 +129,7 @@ sub usage
+ 	print STDERR <<EOUSAGE;
+ USAGE
+ 	dirvish --vault vault OPTIONS [ file_list ]
+-	
++
+ OPTIONS
+ 	--image image_name
+ 	--config configfile
+@@ -145,7 +145,7 @@ EOUSAGE
+ 	exit 255;
+ }
+ 
+-$Options = { 
++$Options = {
+ 	'Command-Args'	=> join(' ', @ARGV),
+ 	'numeric-ids'	=> 1,
+ 	'devices'	=> 1,
+@@ -475,7 +475,7 @@ if (!$$Options{'no-run'})
+ 	}
+ 
+ 	open(SUMMARY, ">$vault/$image/summary")
+-		or seppuku 231, "cannot create $vault/$image/summary"; 
++		or seppuku 231, "cannot create $vault/$image/summary";
+ } else {
+ 	open(SUMMARY, ">-");
+ }
+@@ -569,7 +569,7 @@ if(scalar @{$$Options{exclude}})
+ 	for (@{$$Options{exclude}})
+ 	{
+ 		print EXCLUDE $_, "\n";
+-	}	
++	}
+ 	close(EXCLUDE);
+ 	$ENV{DIRVISH_EXCLUDE} = $exl_file;
+ }
+@@ -778,11 +778,7 @@ if($status{fatal})
+ {
+ 	if ($$Options{btrfs})
+ 	{
+-		# am I not root?
+-		if ($< != 0)
+-		{
+-			system("btrfs property set -ts $destree ro false > /dev/null");
+-		}
++		system("btrfs property set -ts $destree ro false > /dev/null");
+ 		system ("btrfs subvolume delete $destree > /dev/null");
+ 	} else {
+ 		system ("rm -rf $destree");
+@@ -819,7 +815,10 @@ if ($Status eq 'success')
+ 		close (HIST);
+ 	}
+ 
+-	system("btrfs property set -ts $destree ro true")
++	if ($$Options{btrfs})
++	{
++		system("btrfs property set -ts $destree ro true")
++	}
+ } else {
+ 	printf STDERR "dirvish error: branch %s:%s image %s failed\n",
+ 		$vault, $$Options{branch}, $$Options{Image};
+@@ -838,7 +837,7 @@ $$Options{log} =~ /.*(gzip)|(bzip2)/
+ 
+ if ($$Options{index} && $$Options{index} !~/^no/i)
+ {
+-	
++
+ 	open(INDEX, ">$vault/$image/index");
+ 	open(FIND, "find $destree -ls|") or seppuku 21, "dirvish $vault:$image cannot build index";
+ 	while (<FIND>)
+@@ -897,7 +896,7 @@ sub errorscan
+ 		print ERR_FILE $_, "\n";
+ 
+ 		$$status{code} or next;
+-		
++
+ 		for $action (@erraction)
+ 		{
+ 			($severity, $pattern, $message) = @$action;

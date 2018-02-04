@@ -1,6 +1,6 @@
 Name:           dirvish-btrfs
 Version:        1.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Dirvish
 License:        GPL
 URL:            http://www.dirvish.org
@@ -15,6 +15,7 @@ Patch4:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOUR
 Patch5:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/06-remove-trailing-slash-in-vault.patch
 Patch6:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/07-dirvish-expire-exit-code.patch
 Patch7:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/08-btrfs-snapshots.patch
+Patch8:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/09-btrfs-root-readwrite.patch
 BuildArch:      noarch
 
 Requires:       rsync
@@ -34,6 +35,7 @@ Dirvish is a fast, disk based, rotating network backup system.
 %patch -P 5 -p 1
 %patch -P 6 -p 1
 %patch -P 7 -p 1
+%patch -P 8 -p 1
 
 %build
 EXECUTABLES="dirvish dirvish-runall dirvish-expire dirvish-locate"
