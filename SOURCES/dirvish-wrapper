@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# check for arguments (vault)
+if [ -z "$1" ]; then
+    echo "Usage: $0 <vault>" >&2
+    exit 1;
+fi
+
+# config
+BANK=/srv/backups
+VAULT="$1"
+HOSTNAME="$(echo "$VAULT" | cut -d/ -f2)"
+
+# backup vault
+dirvish --vault "$VAULT"
+
+# path to summary file
+SUMMARY_FILE="$BANK/$VAULT/latest/summary"
+
+# determine status
+STATUS='unknown'
+if [ ! -e "$SUMMARY_FILE" ]; then
+    STATUS="error"
+else
+    STATUS_LINE=$(tail -n 1 "$SUMMARY_FILE")
+    echo "$STATUS_LINE" | grep -q -i 'success' && STATUS='OK'
+    echo "$STATUS_LINE" | grep -q -i 'warning' && STATUS='warning'
+    echo "$STATUS_LINE" | grep -q -i 'error'   && STATUS='error'
+    echo "$STATUS_LINE" | grep -q -i '255'     && STATUS='error'
+    echo "$STATUS_LINE" | grep -q -i 'file vanished on sender' && STATUS='OK'
+fi
+
+# get transfered byte
+BYTES=0
+[ "$STATUS" != "error" ] && BYTES=$(zgrep "Total transferred file size" $BANK/$VAULT/latest/log.gz | awk '{print $5}')
+
+# cleanup expired backups (only in case of 'success' or 'warning')
+if [[ "$STATUS" != "error" ]]; then
+    dirvish-expire --vault "$VAULT" >/dev/null
+fi
+
+exit 0

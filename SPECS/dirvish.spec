@@ -1,12 +1,13 @@
 Name:           dirvish-btrfs
 Version:        1.2.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Dirvish
 License:        GPL
 URL:            http://www.dirvish.org
 
 Source0:        http://www.dirvish.org/dirvish-%{version}.tgz
 Source1:        https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/master.conf#/%{name}-%{version}.conf
+Source2:        https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/dirvish-wrapper
 Patch0:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/01-imsort-reserved-warning.patch
 Patch1:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/02-rsync-options.patch
 Patch2:         https://raw.githubusercontent.com/keachi/dirvish-rpm/master/SOURCES/03-dirvish-locate.patch
@@ -69,7 +70,7 @@ mkdir -p %{buildroot}/usr/{bin,share/man/man{5,8}}
 
 # install executables
 for f in $EXECUTABLES; do
-  install -Dm755 "$f" "%{buildroot}%{_prefix}/bin/${f}"
+  install -Dm755 "$f" "%{buildroot}%{_sbindir}/${f}"
 done
 
 # install manpages
@@ -84,6 +85,7 @@ mkdir -p %{buildroot}/etc/dirvish/
 
 # create directory for configs
 install -Dm644 %{SOURCE1} "%{buildroot}%{_sysconfdir}/dirvish/master.conf"
+install -Dm755 %{SOURCE2} "%{buildroot}%{_sbindir}/dirvish-wrapper"
 
 %{_fixperms} $RPM_BUILD_ROOT/*
 
@@ -92,7 +94,8 @@ install -Dm644 %{SOURCE1} "%{buildroot}%{_sysconfdir}/dirvish/master.conf"
 %config(noreplace)%{_sysconfdir}/dirvish/master.conf
 %{_mandir}/man5/*
 %{_mandir}/man8/*
-%{_prefix}/bin/dirvish
-%{_prefix}/bin/dirvish-expire
-%{_prefix}/bin/dirvish-locate
-%{_prefix}/bin/dirvish-runall
+%{_sbindir}/dirvish
+%{_sbindir}/dirvish-expire
+%{_sbindir}/dirvish-locate
+%{_sbindir}/dirvish-runall
+%{_sbindir}/dirvish-wrapper
